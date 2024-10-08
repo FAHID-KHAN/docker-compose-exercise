@@ -1,0 +1,8 @@
+CONTAINER ID   IMAGE                              COMMAND                CREATED              STATUS              PORTS                                       NAMES
+9a8498c48162   docker-compose-exercise-service2   "/app/service2"        About a minute ago   Up About a minute                                               docker-compose-exercise-service2-1
+559469d063d9   docker-compose-exercise-service1   "python service1.py"   9 minutes ago        Up About a minute   0.0.0.0:8199->8199/tcp, :::8199->8199/tcp   docker-compose-exercise-service1-1
+NETWORK ID     NAME                              DRIVER    SCOPE
+3a367d260605   bridge                            bridge    local
+a621c8748caa   docker-compose-exercise_default   bridge    local
+3d5c4a9031d0   host                              host      local
+2f9df6b29431   none                              null      local

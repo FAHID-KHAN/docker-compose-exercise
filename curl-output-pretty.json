@@ -1,0 +1,15 @@
+{
+  "service1": {
+    "disk_space": "Filesystem      Size  Used Avail Use% Mounted on\noverlay         226G   40G  175G  19% /\n",
+    "ip_address": "172.18.0.3",
+    "processes": "USER         PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND\nroot           1  0.2  0.4 109780 32816 ?        Ssl  17:15   0:00 python service1.py\nroot          32  0.0  0.0   2576   916 ?        S    17:21   0:00 /bin/sh -c ps aux\nroot          33  0.0  0.0   8480  4164 ?        R    17:21   0:00 ps aux\n",
+    "uptime": "up 1 week, 4 days, 23 hours, 33 minutes",
+    "uptime_seconds": 1035207.85
+  },
+  "service2": {
+    "disk_space": "Filesystem                Size      Used Available Use% Mounted on\noverlay                 226.0G     39.8G    174.6G  19% /\n",
+    "ip_address": "172.18.0.2",
+    "processes": "PID   USER     TIME  COMMAND\n    1 root      0:00 /app/service2\n   32 root      0:00 ps aux\n",
+    "uptime": "up 11 days, 23 hours, 33 minutes"
+  }
+}
