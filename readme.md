@@ -19,6 +19,18 @@ Containers in this setup shared some resources with the host system:
 LLM model gpt 3.5 was used to get the idea of go lang and the coding process of go lang to show different data similiar to python os library . Also the markdown was first written by me and then it was given to llm to refine the written item .
 
 
+### NGINX Gateway with Load Balancing and Authentication
+
+An NGINX gateway was configured to handle external requests, implementing the following features:
+- **Load Balancing**: NGINX distributes requests across three instances of Service1 using a round-robin algorithm, balancing the load across the instances.
+- **Basic Authentication**: Access to the application requires login credentials. The username and password are set as follows in login.txt file.
+  
+  
+- **Web Interface**: A simple HTML interface is provided at `http://localhost:8198/static/index.html`, allowing users to interact with the application. The interface includes:
+  - **REQUEST Button**: Sends a request to one of the Service1 instances (selected by the load balancer) and displays the response.
+  - **STOP Button**: Attempts to stop all services and exit Docker Compose gracefully.
+
+
 # For course personnel 
 If the course personnel wants to run this exercise all they need to do is run 
 
@@ -30,3 +42,8 @@ docker compose without hyphen(-)
 Also a curl output from the docker exefcise is given in the repo for better understanding of how the data is being showed .JQ was used for this if you want to test it on your host machine run this command to get pretty json output 
 
 - "sudo apt-get install jq"
+
+
+
+
+

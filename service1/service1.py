@@ -2,6 +2,7 @@ from flask import Flask,jsonify
 import requests
 import os 
 import subprocess
+import time 
 
 app = Flask(__name__)
 
@@ -17,12 +18,11 @@ def get_container_info():
         "processes": processes,
         "disk_space": disk_space,
         "uptime_seconds":uptime_seconds,
-        "uptime": uptime_formatted  # Use the formatted uptime here
+        "uptime": uptime_formatted  
     }
 
 @app.route('/')
 def index():
-    #calling service 2
     try:
         service2_response = requests.get('http://service2:5000')
         service2_data = service2_response.json()
@@ -30,11 +30,23 @@ def index():
         service2_data = {"error":str(e)}
 
     service1_data = get_container_info()
+    time.sleep(2)
     return jsonify({
         "service1":service1_data,
         "service2": service2_data
     })
 
+@app.route('/stop', methods=['POST'])
+def stop():
+    try:
+        container_ids = subprocess.check_output(["docker", "ps", "-q"]).decode("utf-8").splitlines()
+        for container_id in container_ids:
+            subprocess.run(["docker", "stop", container_id], check=True)
+        for container_id in container_ids:
+            subprocess.run(["docker", "rm", container_id], check=True)
+        return jsonify({"status": "Stopping all containers"}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0',port = 8199)
+    app.run(host='0.0.0.0', port=8199)

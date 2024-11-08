@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NGINX Load Balancer Interface</title>
+</head>
+<body>
+    <h1>NGINX Load Balancer Interface</h1>
+    <button onclick="sendRequest()">REQUEST</button>
+    <button onclick="stopService()">STOP</button>
+    <textarea id="response" rows="10" cols="50" readonly></textarea>
+
+    <script>
+        async function sendRequest() {
+            const response = await fetch('/');
+            const data = await response.json();
+            document.getElementById('response').value = JSON.stringify(data, null, 2);
+        }
+
+        async function stopService() {
+            const response = await fetch('/stop', { method: 'POST' });
+            if (response.ok) {
+                document.getElementById('response').value = "Stopping all containers...";
+            } else {
+                document.getElementById('response').value = "Error stopping containers.";
+            }
+        }
+    </script>
+</body>
+</html>
