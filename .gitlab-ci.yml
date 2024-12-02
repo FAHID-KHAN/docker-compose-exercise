@@ -1,0 +1,30 @@
+stages:
+  - build
+  - test
+  - deploy
+
+build:
+  stage: build
+  script:
+    - docker-compose build --no-cache
+  tags:
+    - docker
+
+test:
+  stage: test
+  script:
+    - docker-compose up -d
+    - curl -X GET http://localhost:8197/state -H "Content-Type: text/plain"
+    - curl -X GET http://localhost:8197/request -H "Content-Type: text/plain"
+    - curl -X PUT http://localhost:8197/state -d "PAUSED" -H "Content-Type: text/plain"
+    - curl -X GET http://localhost:8197/run-log -H "Content-Type: text/plain"
+    - docker-compose down
+  tags:
+    - docker
+
+deploy:
+  stage: deploy
+  script:
+    - docker-compose up -d
+  tags:
+    - docker
