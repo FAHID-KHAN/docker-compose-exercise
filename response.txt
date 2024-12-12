@@ -1,0 +1,302 @@
+Here's the complete **folder structure** and its corresponding files for your enhanced system, based on the requirements and enhancements we've discussed.
+
+---
+
+### **New Folder Structure**
+
+```plaintext
+project/
+├── api-gateway/
+│   ├── Dockerfile
+│   ├── api_gateway.py
+├── service1/
+│   ├── Dockerfile
+│   ├── service1.py
+├── service2/
+│   ├── Dockerfile
+│   ├── service2.go
+├── nginx.conf
+├── docker-compose.yml
+├── .gitlab-ci.yml
+├── tests/
+│   ├── test_api.py
+├── html/
+│   ├── index.html
+├── .htpasswd
+├── README.md
+├── EndReport.pdf
+```
+
+---
+
+### **File Contents**
+
+#### **1. `api-gateway/Dockerfile`**
+```dockerfile
+FROM python:3.8-slim
+WORKDIR /app
+COPY . /app
+RUN pip install flask
+CMD ["python", "api_gateway.py"]
+```
+
+#### **2. `api-gateway/api_gateway.py`**
+```python
+from flask import Flask, request
+from datetime import datetime
+
+app = Flask(__name__)
+
+# Global state variables
+state = "INIT"
+run_log = []
+
+@app.route("/state", methods=["GET", "PUT"])
+def handle_state():
+    global state
+    if request.method == "GET":
+        return state, 200, {"Content-Type": "text/plain"}
+
+    if request.method == "PUT":
+        new_state = request.data.decode("utf-8")
+        if new_state in ["INIT", "PAUSED", "RUNNING", "SHUTDOWN"] and new_state != state:
+            timestamp = datetime.utcnow().isoformat()
+            run_log.append(f"{timestamp}: {state} -> {new_state}")
+            state = new_state
+            if new_state == "SHUTDOWN":
+                return "System shutting down...", 200, {"Content-Type": "text/plain"}
+            return f"State changed to {new_state}", 200, {"Content-Type": "text/plain"}
+        return "Invalid state or no change detected", 400, {"Content-Type": "text/plain"}
+
+@app.route("/request", methods=["GET"])
+def handle_request():
+    if state == "RUNNING":
+        return "Request processed successfully.", 200, {"Content-Type": "text/plain"}
+    elif state == "PAUSED":
+        return "System is paused.", 403, {"Content-Type": "text/plain"}
+    else:
+        return "System is not running.", 400, {"Content-Type": "text/plain"}
+
+@app.route("/run-log", methods=["GET"])
+def get_run_log():
+    return "\n".join(run_log), 200, {"Content-Type": "text/plain"}
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=8197)
+```
+
+---
+
+#### **3. `service1/Dockerfile`**
+```dockerfile
+FROM python:3.8-slim
+WORKDIR /app
+COPY . /app
+RUN apt-get update && apt-get install -y procps && rm -rf /var/lib/apt/lists/*
+RUN pip install flask requests
+CMD ["python", "service1.py"]
+```
+
+#### **4. `service1/service1.py`**
+*(No changes from your provided code.)*
+
+---
+
+#### **5. `service2/Dockerfile`**
+```dockerfile
+FROM golang:1.18
+WORKDIR /app
+COPY . /app
+RUN go build -o service2
+CMD ["./service2"]
+```
+
+#### **6. `service2/service2.go`**
+*(No changes from your provided code.)*
+
+---
+
+#### **7. `nginx.conf`**
+```nginx
+events {}
+
+http {
+    upstream service1_backend {
+        server service1-1:8199;
+        server service1-2:8199;
+        server service1-3:8199;
+    }
+
+    server {
+        listen 80;
+
+        location / {
+            auth_basic "Restricted Access";
+            auth_basic_user_file /etc/nginx/.htpasswd;
+            proxy_pass http://service1_backend;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+        }
+
+        location /api/ {
+            proxy_pass http://api-gateway:8197/;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+        }
+
+        location /static/ {
+            alias /usr/share/nginx/html/;
+            autoindex on;
+        }
+    }
+}
+```
+
+---
+
+#### **8. `docker-compose.yml`**
+```yaml
+version: '3.8'
+
+services:
+  service1-1:
+    build: ./service1
+    depends_on:
+      - service2
+
+  service1-2:
+    build: ./service1
+    depends_on:
+      - service2
+
+  service1-3:
+    build: ./service1
+    depends_on:
+      - service2
+
+  service2:
+    build: ./service2
+
+  api-gateway:
+    build: ./api-gateway
+    ports:
+      - "8197:8197"
+    depends_on:
+      - service1-1
+      - service1-2
+      - service1-3
+
+  nginx:
+    image: nginx:latest
+    ports:
+      - "8198:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./.htpasswd:/etc/nginx/.htpasswd:ro
+      - ./html:/usr/share/nginx/html:ro
+    depends_on:
+      - api-gateway
+```
+
+---
+
+#### **9. `.gitlab-ci.yml`**
+```yaml
+stages:
+  - build
+  - test
+  - deploy
+
+variables:
+  DOCKER_HOST: tcp://docker:2375/
+
+build:
+  stage: build
+  image: docker:latest
+  services:
+    - docker:dind
+  script:
+    - docker-compose build
+
+test:
+  stage: test
+  image: python:3.8-slim
+  before_script:
+    - pip install requests
+  script:
+    - python tests/test_api.py
+
+deploy:
+  stage: deploy
+  image: docker:latest
+  services:
+    - docker:dind
+  script:
+    - docker-compose up -d
+```
+
+---
+
+#### **10. `tests/test_api.py`**
+```python
+import requests
+
+BASE_URL = "http://localhost:8197"
+
+def test_get_state():
+    response = requests.get(f"{BASE_URL}/state")
+    assert response.status_code == 200
+
+def test_put_state():
+    response = requests.put(f"{BASE_URL}/state", data="RUNNING")
+    assert response.status_code == 200
+    assert "State changed to RUNNING" in response.text
+
+def test_run_log():
+    response = requests.get(f"{BASE_URL}/run-log")
+    assert response.status_code == 200
+
+if __name__ == "__main__":
+    test_get_state()
+    test_put_state()
+    test_run_log()
+    print("All tests passed.")
+```
+
+---
+
+#### **11. `html/index.html`**
+*(No changes from your provided file.)*
+
+---
+
+#### **12. `.htpasswd`**
+```plaintext
+kari:$apr1$abc$eWf2G3v9sVcNTF8u9HvIc0
+```
+
+---
+
+### Steps to Deploy and Test
+1. **Build and Run Locally**
+   ```bash
+   docker-compose up --build
+   ```
+
+2. **Run Automated Tests**
+   ```bash
+   python tests/test_api.py
+   ```
+
+3. **Push to GitLab and Trigger Pipeline**
+   ```bash
+   git add .
+   git commit -m "Implemented API Gateway and CI/CD Pipeline"
+   git push origin project
+   ```
+
+Let me know if you'd like further refinements!
