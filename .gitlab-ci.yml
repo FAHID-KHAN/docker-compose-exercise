@@ -8,12 +8,6 @@ variables:
   DOCKER_DRIVER: overlay2
   TEST_REPORTS_DIR: tests/reports
 
-# Specify runner tags (if you have specific runner tags assigned)
-default:
-  tags:
-    - docker
-  interruptible: true
-
 # Build Stage
 build:
   stage: build
@@ -87,10 +81,4 @@ deploy:
   only:
     - main  
 
-# Specify Runner Settings
-runner:
-  tags:
-    - docker  # Use the runner tag configured for your runner
-  interruptible: true
-  script:
-    - echo "Runner section added for CI/CD integration."
+
