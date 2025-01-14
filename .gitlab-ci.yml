@@ -1,26 +1,62 @@
 stages:
   - build
   - test
+  - static-analysis
   - deploy
 
 variables:
   DOCKER_DRIVER: overlay2
 
+# Build Stage
 build:
   stage: build
   script:
+    - echo "Building Docker images..."
     - docker-compose build
+  artifacts:
+    paths:
+      - ./api-gateway
+      - ./service1
+      - ./service2
 
+# Test Stage
 test:
   stage: test
   script:
+    - echo "Starting containers for testing..."
     - docker-compose up -d
-    - python tests/test_state.py
+    - echo "Running API gateway tests..."
+    - python3 -m pytest tests/test_api_gateway.py
+    - echo "Running Service1 tests..."
+    - python3 -m pytest tests/test_service1.py
+    - echo "Running Service2 tests..."
+    - python3 -m pytest tests/test_service2.py
+    - echo "Tearing down test containers..."
     - docker-compose down
+  artifacts:
+    when: always
+    paths:
+      - tests/reports/  # Store test reports for review
+    reports:
+      junit: tests/reports/junit.xml  # For test results in GitLab
 
+# Optional Static Analysis Stage
+static-analysis:
+  stage: static-analysis
+  script:
+    - echo "Running static analysis..."
+    - pylint api-gateway/api_gateway.py service1/service1.py service2/service2.go
+    - echo "Static analysis complete."
+  allow_failure: true  # Does not block pipeline if this stage fails
+
+# Deploy Stage
 deploy:
   stage: deploy
   script:
+    - echo "Deploying containers..."
     - docker-compose up -d
   environment:
     name: production
+    url: http://localhost:8198
+  only:
+    - main  # Only deploy from the main branch

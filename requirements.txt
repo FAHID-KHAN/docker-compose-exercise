@@ -1,0 +1,15 @@
+# Python dependencies
+flask==2.3.2                # For Flask in service1
+requests==2.31.0            # Used in tests
+pytest==8.3.4               # For running the tests
+pytest-mock==3.11.1         # Mocking utilities for pytest
+Faker==24.11.0              # For generating fake data in tests (optional)
+gunicorn==20.1.0            # Production server for Flask apps
+
+# API Gateway dependencies
+flask-restful==0.3.9        # For building RESTful APIs in api_gateway
+flask-cors==3.0.10          # For handling CORS if needed in api_gateway
+
+# Optional dependencies
+pylint==2.17.5              # Static analysis
+black==23.7.0               # Code formatting
