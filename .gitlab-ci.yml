@@ -6,6 +6,13 @@ stages:
 
 variables:
   DOCKER_DRIVER: overlay2
+  TEST_REPORTS_DIR: tests/reports
+
+# Specify runner tags (if you have specific runner tags assigned)
+default:
+  tags:
+    - docker
+  interruptible: true
 
 # Build Stage
 build:
@@ -14,6 +21,7 @@ build:
     - echo "Building Docker images..."
     - docker-compose build
   artifacts:
+    when: always
     paths:
       - ./api-gateway
       - ./service1
@@ -22,36 +30,54 @@ build:
 # Test Stage
 test:
   stage: test
+  dependencies:
+    - build
   script:
     - echo "Starting containers for testing..."
     - docker-compose up -d
-    - echo "Running API gateway tests..."
-    - python3 -m pytest tests/test_api_gateway.py
+    - echo "Running API Gateway tests..."
+    - mkdir -p ${TEST_REPORTS_DIR}
+    - python3 -m pytest tests/test_api_gateway.py --junitxml=${TEST_REPORTS_DIR}/test_api_gateway.xml
     - echo "Running Service1 tests..."
-    - python3 -m pytest tests/test_service1.py
+    - python3 -m pytest tests/test_service1.py --junitxml=${TEST_REPORTS_DIR}/test_service1.xml
     - echo "Running Service2 tests..."
-    - python3 -m pytest tests/test_service2.py
+    - python3 -m pytest tests/test_service2.py --junitxml=${TEST_REPORTS_DIR}/test_service2.xml
     - echo "Tearing down test containers..."
     - docker-compose down
   artifacts:
     when: always
     paths:
-      - tests/reports/  # Store test reports for review
+      - ${TEST_REPORTS_DIR}  # Store test reports for review
     reports:
-      junit: tests/reports/junit.xml  # For test results in GitLab
+      junit:
+        - ${TEST_REPORTS_DIR}/test_api_gateway.xml
+        - ${TEST_REPORTS_DIR}/test_service1.xml
+        - ${TEST_REPORTS_DIR}/test_service2.xml
 
 # Optional Static Analysis Stage
 static-analysis:
   stage: static-analysis
   script:
     - echo "Running static analysis..."
-    - pylint api-gateway/api_gateway.py service1/service1.py service2/service2.go
+    - pip install pylint
+    - pylint api-gateway/api_gateway.py service1/service1.py
     - echo "Static analysis complete."
   allow_failure: true  # Does not block pipeline if this stage fails
+  artifacts:
+    when: always
+    paths:
+      - pylint-report.txt
+  script:
+    - echo "Running pylint for Python files..."
+    - pylint api-gateway/api_gateway.py service1/service1.py > pylint-report.txt || true
+    - echo "Static analysis completed."
 
 # Deploy Stage
 deploy:
   stage: deploy
+  dependencies:
+    - build
+    - test
   script:
     - echo "Deploying containers..."
     - docker-compose up -d
@@ -59,4 +85,12 @@ deploy:
     name: production
     url: http://localhost:8198
   only:
-    - main  # Only deploy from the main branch
+    - main  
+
+# Specify Runner Settings
+runner:
+  tags:
+    - docker  # Use the runner tag configured for your runner
+  interruptible: true
+  script:
+    - echo "Runner section added for CI/CD integration."
