@@ -14,7 +14,7 @@ docker-test:
   script:
     - echo "Testing Docker access..."
     - docker info
-
+#simple comment 
 build:
   stage: build
   script:
