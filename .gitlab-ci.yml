@@ -14,7 +14,7 @@ docker-test:
   script:
     - echo "Testing Docker access..."
     - docker info
-    
+
 build:
   stage: build
   script:
@@ -26,9 +26,6 @@ build:
       - ./api-gateway
       - ./service1
       - ./service2
-
-
-
 
 test:
   stage: test
