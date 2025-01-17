@@ -21,7 +21,7 @@ build:
       - ./service1
       - ./service2
 
-# Test Stage
+
 test:
   stage: test
   dependencies:
