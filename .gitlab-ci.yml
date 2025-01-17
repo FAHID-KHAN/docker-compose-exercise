@@ -9,7 +9,12 @@ variables:
   DOCKER_DRIVER: overlay2
   TEST_REPORTS_DIR: tests/reports
 
-
+docker-test:
+  stage: test
+  script:
+    - echo "Testing Docker access..."
+    - docker info
+    
 build:
   stage: build
   script:
@@ -23,11 +28,7 @@ build:
       - ./service2
 
 
-docker-test:
-  stage: test
-  script:
-    - echo "Testing Docker access..."
-    - docker info
+
 
 test:
   stage: test
