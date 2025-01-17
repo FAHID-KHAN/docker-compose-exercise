@@ -1,4 +1,5 @@
 stages:
+  - docker-test
   - build
   - test
   - static-analysis
@@ -21,6 +22,12 @@ build:
       - ./service1
       - ./service2
 
+
+docker-test:
+  stage: test
+  script:
+    - echo "Testing Docker access..."
+    - docker info
 
 test:
   stage: test
