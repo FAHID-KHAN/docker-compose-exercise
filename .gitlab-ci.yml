@@ -1,9 +1,4 @@
-before_script:
-  - export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
-  - ln -s /Applications/Docker.app/Contents/Resources/bin/docker-compose /usr/local/bin/docker-compose || true
-
 stages:
-  - docker-test
   - build
   - test
   - static-analysis
@@ -13,11 +8,6 @@ variables:
   DOCKER_DRIVER: overlay2
   TEST_REPORTS_DIR: tests/reports
 
-docker-test:
-  stage: test
-  script:
-    - echo "Testing Docker access..."
-    - docker info
 #simple comment 
 build:
   stage: build
