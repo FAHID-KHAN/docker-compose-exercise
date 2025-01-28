@@ -52,7 +52,7 @@ test:
         - ${TEST_REPORTS_DIR}/test_service1.xml
         - ${TEST_REPORTS_DIR}/test_service2.xml
 
-# Static Analysis Stage
+# Static Analysis Stag
 static-analysis:
   stage: static-analysis
   tags:
