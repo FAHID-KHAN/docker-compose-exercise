@@ -8,9 +8,11 @@ variables:
   DOCKER_DRIVER: overlay2
   TEST_REPORTS_DIR: tests/reports
 
-#simple comment 
+# Build Stage
 build:
   stage: build
+  tags:
+    - macbook  # Ensure this matches the tag in the GitLab runner
   script:
     - echo "Building Docker images..."
     - docker-compose build
@@ -21,10 +23,13 @@ build:
       - ./service1
       - ./service2
 
+# Test Stage
 test:
   stage: test
   dependencies:
     - build
+  tags:
+    - macbook  # Ensure this matches the tag in the GitLab runner
   script:
     - echo "Starting containers for testing..."
     - docker-compose up -d
@@ -47,9 +52,11 @@ test:
         - ${TEST_REPORTS_DIR}/test_service1.xml
         - ${TEST_REPORTS_DIR}/test_service2.xml
 
-# Optional Static Analysis Stage
+# Static Analysis Stage
 static-analysis:
   stage: static-analysis
+  tags:
+    - macbook  # Ensure this matches the tag in the GitLab runner
   script:
     - echo "Running static analysis..."
     - pip install pylint
@@ -71,6 +78,8 @@ deploy:
   dependencies:
     - build
     - test
+  tags:
+    - macbook  
   script:
     - echo "Deploying containers..."
     - docker-compose up -d
@@ -79,5 +88,3 @@ deploy:
     url: http://localhost:8198
   only:
     - main  
-
-
