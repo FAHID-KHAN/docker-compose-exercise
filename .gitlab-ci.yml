@@ -79,7 +79,7 @@ deploy:
     - build
     - test
   tags:
-    - macbook  
+    - macbook  #
   script:
     - echo "Deploying containers..."
     - docker-compose up -d
