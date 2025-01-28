@@ -56,7 +56,7 @@ test:
 static-analysis:
   stage: static-analysis
   tags:
-    - macbook  # Ensure this matches the tag in the GitLab runner
+    - macbook  #Ensure this matches the tag in the GitLab runner
   script:
     - echo "Running static analysis..."
     - pip install pylint
