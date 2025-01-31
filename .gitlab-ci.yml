@@ -72,12 +72,10 @@ static-analysis:
     - pylint api-gateway/api_gateway.py service1/service1.py > pylint-report.txt || true
     - echo "Static analysis completed."
 
-
 deploy:
   stage: deploy
   dependencies:
     - build
-    - test
   script:
     - echo "Stopping any existing containers..."
     - docker-compose down || true
