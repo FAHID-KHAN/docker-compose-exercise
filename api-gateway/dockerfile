@@ -1,17 +1,15 @@
 FROM python:3.8-slim
-
-# Set working directory
 WORKDIR /app
 
-# Copy application code
+
 COPY api_gateway.py /app
 COPY requirements.txt /app
 
-# Install dependencies
+
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Expose port
+
 EXPOSE 8197
 
-# Start the API Gateway
+
 CMD ["python", "api_gateway.py"]

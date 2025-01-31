@@ -32,8 +32,8 @@ def state():
                 return "State reset to INIT", 200
 
             if new_state == "SHUTDOWN":
-                os.system("docker-compose down")
-                return "System shutting down", 200
+               print("Shutting down services...")
+               os.system("docker stop $(docker ps -q)")
 
             return f"State changed to {new_state}", 200
         else:

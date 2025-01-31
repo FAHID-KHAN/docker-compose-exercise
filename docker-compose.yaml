@@ -3,8 +3,6 @@ version: '3.8'
 services:
   service1-1:
     build: ./service1
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
     depends_on:
       - service2
 
@@ -30,19 +28,12 @@ services:
       - ./.htpasswd:/etc/nginx/.htpasswd:ro  
       - ./html:/usr/share/nginx/html:ro
     depends_on:
-      - service1-1
-      - service1-2
-      - service1-3
-      - api_gateway
+      - api_gateway  
 
   api_gateway:
     build: ./api-gateway
     ports:
-      - "8197:8197"  # Port for the API Gateway service
-    volumes:
-      - ./api-gateway:/app
+      - "8197:8197"  
+    restart: always  
     depends_on:
-      - service1-1
-      - service1-2
-      - service1-3
       - service2
