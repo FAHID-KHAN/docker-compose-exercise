@@ -1,15 +1,18 @@
 stages:
   - build
   - test
+  - static-analysis
   - deploy
 
 variables:
   DOCKER_DRIVER: overlay2
   TEST_REPORTS_DIR: tests/reports
 
-
+# Build Stage
 build:
   stage: build
+  tags:
+    - macbook  # Ensure this matches the tag in the GitLab runner
   script:
     - echo "Building Docker images..."
     - docker-compose build
@@ -20,11 +23,13 @@ build:
       - ./service1
       - ./service2
 
-
+# Test Stage
 test:
   stage: test
   dependencies:
     - build
+  tags:
+    - macbook  # Ensure this matches the tag in the GitLab runner
   script:
     - echo "Starting containers for testing..."
     - docker-compose up -d
@@ -40,19 +45,41 @@ test:
   artifacts:
     when: always
     paths:
-      - ${TEST_REPORTS_DIR}  
+      - ${TEST_REPORTS_DIR}  # Store test reports for review
     reports:
       junit:
         - ${TEST_REPORTS_DIR}/test_api_gateway.xml
         - ${TEST_REPORTS_DIR}/test_service1.xml
         - ${TEST_REPORTS_DIR}/test_service2.xml
 
+# Static Analysis Stag
+static-analysis:
+  stage: static-analysis
+  tags:
+    - macbook  Ensure this matches the tag in the GitLab runner
+  script:
+    - echo "Running static analysis..."
+    - pip install pylint
+    - pylint api-gateway/api_gateway.py service1/service1.py
+    - echo "Static analysis complete."
+  allow_failure: true  # Does not block pipeline if this stage fails
+  artifacts:
+    when: always
+    paths:
+      - pylint-report.txt
+  script:
+    - echo "Running pylint for Python files..."
+    - pylint api-gateway/api_gateway.py service1/service1.py > pylint-report.txt || true
+    - echo "Static analysis completed."
 
+# Deploy Stage
 deploy:
   stage: deploy
   dependencies:
     - build
     - test
+  tags:
+    - macbook  
   script:
     - echo "Deploying containers..."
     - docker-compose up -d
@@ -60,5 +87,5 @@ deploy:
     name: production
     url: http://localhost:8198
   only:
-    - main
-    - project  #
+    - main  
+    - project 
