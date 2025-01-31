@@ -23,7 +23,6 @@ build:
       - ./service1
       - ./service2
 
-# Test Stage
 test:
   stage: test
   dependencies:
@@ -73,20 +72,24 @@ static-analysis:
     - pylint api-gateway/api_gateway.py service1/service1.py > pylint-report.txt || true
     - echo "Static analysis completed."
 
-# Deploy Stage
+
 deploy:
   stage: deploy
   dependencies:
     - build
     - test
-  tags:
-    - macbook  
   script:
+    - echo "Stopping any existing containers..."
+    - docker-compose down || true
+    - echo "Cleaning up stopped containers..."
+    - docker container prune -f || true
+    - echo "Cleaning up unused networks..."
+    - docker network prune -f || true
     - echo "Deploying containers..."
     - docker-compose up -d
   environment:
     name: production
     url: http://localhost:8198
   only:
-    - main  
-    - project 
+    - main
+    - project
