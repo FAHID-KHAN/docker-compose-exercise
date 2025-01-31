@@ -4,7 +4,7 @@ from datetime import datetime
 
 app = Flask(__name__)
 
-# Initial State
+
 global_state = "INIT"
 state_log = []
 request_count = 0
@@ -25,7 +25,7 @@ def state():
                 state_log.append(f"{datetime.now()}: {global_state}->{new_state}")
                 global_state = new_state
 
-            # Special cases for INIT and SHUTDOWN
+         
             if new_state == "INIT":
                 global_state = "INIT"
                 state_log.clear()
@@ -45,7 +45,7 @@ def make_request():
     if global_state != "RUNNING":
         return "System is not in RUNNING state", 403
 
-    # Simulate a request to Service1 (e.g., load balancer)
+    
     request_count += 1
     return jsonify({"message": "Request processed", "total_requests": request_count})
 
