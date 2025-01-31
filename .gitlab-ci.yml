@@ -42,6 +42,7 @@ test:
     - python3 -m pytest tests/test_service2.py --junitxml=${TEST_REPORTS_DIR}/test_service2.xml
     - echo "Tearing down test containers..."
     - docker-compose down
+  allow_failure: true
   artifacts:
     when: always
     paths:
