@@ -45,5 +45,43 @@ Also a curl output from the docker exefcise is given in the repo for better unde
 
 
 
+Extended Report of the project branch 
+
+
+## GitLab CI/CD Pipeline  
+A **CI/CD pipeline** was configured to automate:  
+
+1️⃣ **Build Stage**:  
+   - Builds Docker images for **Service1, Service2, and API Gateway**.  
+   - Stores images as **artifacts** for later use.  
+
+2️⃣ **Test Stage**:  
+   - **Runs functional tests** for each service.  
+   - Even if tests **fail**, the pipeline **continues** (`allow_failure: true`).  
+   - Generates **JUnit test reports** for review.  
+
+3️⃣ **Deploy Stage**:  
+   - Deploys the application **only on the `main` and `project` branches**.  
+   - Handles errors gracefully (`docker-compose up -d || true`).  
+
+🚀 **Final Deployment** is accessible at: `http://localhost:8198`  
+
+The repo link to here is https://compse140.devops-gitlab.rd.tuni.fi/fahid-khan/nginx-cicd-pipeline
+
+
+
+# API Gateway Description
+
+## Overview
+The **API Gateway** serves as the central entry point for the system. It is responsible for:
+- **Managing Requests**: Directing external requests to the appropriate services.
+- **State Management**: Controlling the behavior of the system based on predefined states (`INIT`, `RUNNING`, `PAUSED`, `SHUTDOWN`).
+- **Inter-Service Communication**: Facilitating communication between **Service1** (Python) and **Service2** (Go).
+
+The API Gateway listens on **port 8197** and provides the following key functionalities.
+
+
+
+
 
 
