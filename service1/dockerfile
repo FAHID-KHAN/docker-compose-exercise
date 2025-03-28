@@ -3,7 +3,14 @@ FROM python:3.8-slim
 WORKDIR /app
 
 COPY . /app
-RUN apt-get update && apt-get install -y procps
+
+RUN apt-get update && \
+    apt-get install -y procps && \
+    rm -rf /var/lib/apt/lists/*
+
+
 RUN pip install flask requests
+
+EXPOSE 8199
 
 CMD ["python", "service1.py"]
